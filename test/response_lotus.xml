@@ -1,0 +1,225 @@
+<RESPONSES>
+ <RESPONSE STATUS="OK">
+   <RANGE>
+      <COUNT>2</COUNT>
+      <START>1</START>
+      <END>2</END>
+   </RANGE>
+   <ALBUM ORD="1">
+      <GN_ID>285989015-2071B8373D274F80A743FC03035A8E91</GN_ID>
+      <ARTIST>Flying Lotus</ARTIST>
+      <TITLE>Until The Quiet Comes</TITLE>
+      <PKG_LANG>ENG</PKG_LANG>
+      <DATE>2012</DATE>
+      <GENRE NUM="105253" ID="35499">Techno</GENRE>
+      <TRACK_COUNT>18</TRACK_COUNT>
+      <TRACK>
+         <TRACK_NUM>1</TRACK_NUM>
+         <GN_ID>285989016-0F3AAEEDA9351A79C04ED7B0004C37FF</GN_ID>
+         <TITLE>All In</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>2</TRACK_NUM>
+         <GN_ID>285989017-0FCD49F5986E7800A3B58F42E50141BE</GN_ID>
+         <ARTIST>Flying Lotus Feat. Niki Randa</ARTIST>
+         <TITLE>Getting There</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>3</TRACK_NUM>
+         <GN_ID>285989018-847AF4209F20376F22F0258481452784</GN_ID>
+         <TITLE>Until The Colours Come</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>4</TRACK_NUM>
+         <GN_ID>285989019-47942D907CB7635753F947A2DEA8C8A6</GN_ID>
+         <TITLE>Heave(n)</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>5</TRACK_NUM>
+         <GN_ID>285989020-B50CFD190DAC8F255A47F6C09238C26C</GN_ID>
+         <TITLE>Tiny Tortures</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>6</TRACK_NUM>
+         <GN_ID>285989021-FF523E8E75F1BBCDEC6057215D92A215</GN_ID>
+         <TITLE>All The Secrets</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>7</TRACK_NUM>
+         <GN_ID>285989022-F953AB3D9B79E7C9F95B095909A9B7EA</GN_ID>
+         <TITLE>Sultan&apos;s Request</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>8</TRACK_NUM>
+         <GN_ID>285989023-AEFD592598CD787E05A26EC767266748</GN_ID>
+         <TITLE>Putty Boy Strut</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>9</TRACK_NUM>
+         <GN_ID>285989024-930D6CF2A6E93F620F11174375C2A301</GN_ID>
+         <ARTIST>Flying Lotus Feat. Erykah Badu</ARTIST>
+         <TITLE>See Thru To U</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>10</TRACK_NUM>
+         <GN_ID>285989025-AF134C13FAB51F2F8AA3032E81252E4B</GN_ID>
+         <TITLE>Until The Quiet Comes</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>11</TRACK_NUM>
+         <GN_ID>285989026-D1E7DFFA958740F645F2EDD794ABD4D0</GN_ID>
+         <ARTIST>Flying Lotus Feat. Thundercat</ARTIST>
+         <TITLE>DMT Song</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>12</TRACK_NUM>
+         <GN_ID>285989027-4EAF961642F561B4CE2534E9C7121F6D</GN_ID>
+         <TITLE>The Nightcaller</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>13</TRACK_NUM>
+         <GN_ID>285989028-D7B1E24D3A41161892D40DBAA0B4E56C</GN_ID>
+         <TITLE>Only If You Wanna</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>14</TRACK_NUM>
+         <GN_ID>285989029-E1643EC265DA0D901D5A0A6D819A2018</GN_ID>
+         <ARTIST>Flying Lotus Feat. Thom Yorke</ARTIST>
+         <TITLE>Electric Candyman</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>15</TRACK_NUM>
+         <GN_ID>285989030-57BDEBFAA5A91ED556858F888005931C</GN_ID>
+         <ARTIST>Flying Lotus Feat. Niki Randa</ARTIST>
+         <TITLE>Hunger</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>16</TRACK_NUM>
+         <GN_ID>285989031-CD169FEE471D4072CCD45D1C366B339E</GN_ID>
+         <ARTIST>Flying Lotus Feat. Laura Darlington</ARTIST>
+         <TITLE>Phantasm</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>17</TRACK_NUM>
+         <GN_ID>285989032-B5AA101434647DA50133E599402538CB</GN_ID>
+         <TITLE>Me Yesterday//Corded</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>18</TRACK_NUM>
+         <GN_ID>285989033-8E19B3F55BAE80617852E2522D0CB347</GN_ID>
+         <TITLE>Dream To Me</TITLE>
+      </TRACK>
+   </ALBUM>
+   <ALBUM ORD="2">
+      <GN_ID>290247111-B36788D6DABA91F32DF08557F32E7E03</GN_ID>
+      <ARTIST>Flying Lotus</ARTIST>
+      <TITLE>Until The Quiet Comes [Bonus Track]</TITLE>
+      <PKG_LANG>ENG</PKG_LANG>
+      <DATE>2012</DATE>
+      <GENRE NUM="105253" ID="35499">Techno</GENRE>
+      <TRACK_COUNT>19</TRACK_COUNT>
+      <TRACK>
+         <TRACK_NUM>1</TRACK_NUM>
+         <GN_ID>290247112-D03E95082623A8305BC1BCBB18756906</GN_ID>
+         <TITLE>All In</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>2</TRACK_NUM>
+         <GN_ID>290247113-12F85F8ABDD36D6BF508B442741BA84D</GN_ID>
+         <ARTIST>Flying Lotus Feat. Niki Randa</ARTIST>
+         <TITLE>Getting There</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>3</TRACK_NUM>
+         <GN_ID>290247114-A65700E379B2ED84ECE030F35ED655F0</GN_ID>
+         <TITLE>Until The Colours Come</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>4</TRACK_NUM>
+         <GN_ID>290247115-DDFC08551052F30998FC586F17643C39</GN_ID>
+         <TITLE>Heave(n)</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>5</TRACK_NUM>
+         <GN_ID>290247116-73CB6738BE76D174E2DE80241DFE1FCF</GN_ID>
+         <TITLE>Tiny Tortures</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>6</TRACK_NUM>
+         <GN_ID>290247117-7965227CCB8F549389101092049BE402</GN_ID>
+         <TITLE>All The Secrets</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>7</TRACK_NUM>
+         <GN_ID>290247118-8EA32BC4500B7DC48C63BBFFEC9156B9</GN_ID>
+         <TITLE>Sultan&apos;s Request</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>8</TRACK_NUM>
+         <GN_ID>290247119-6293A33DD2988636AC2A73455E3CC174</GN_ID>
+         <TITLE>Putty Boy Strut</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>9</TRACK_NUM>
+         <GN_ID>290247120-65DFCC4B48BAFCC412C43E7FBCC39010</GN_ID>
+         <ARTIST>Flying Lotus Feat. Erykah Badu</ARTIST>
+         <TITLE>See Thru To U</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>10</TRACK_NUM>
+         <GN_ID>290247121-19DA2623DA3F95FC24206DC89C8BC074</GN_ID>
+         <TITLE>Until The Quiet Comes</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>11</TRACK_NUM>
+         <GN_ID>290247122-3EE48EC0E6B9008A78B8D298A76ADD07</GN_ID>
+         <ARTIST>Flying Lotus Feat. Thundercat</ARTIST>
+         <TITLE>DMT Song</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>12</TRACK_NUM>
+         <GN_ID>290247123-1F4DB3EBEF3305C969DBFF25AAE0474E</GN_ID>
+         <TITLE>The Nightcaller</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>13</TRACK_NUM>
+         <GN_ID>290247124-F3A3C43F1C890025545B6C506620C5E8</GN_ID>
+         <TITLE>Only If You Wanna</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>14</TRACK_NUM>
+         <GN_ID>290247125-7C2A601E3723CD12D19545766802E1BC</GN_ID>
+         <ARTIST>Flying Lotus Feat. Thom Yorke</ARTIST>
+         <TITLE>Electric Candyman</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>15</TRACK_NUM>
+         <GN_ID>290247126-605902D33AAE86E5351E5931E7C11574</GN_ID>
+         <ARTIST>Flying Lotus Feat. Niki Randa</ARTIST>
+         <TITLE>Hunger</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>16</TRACK_NUM>
+         <GN_ID>290247127-71809CE206C17615B02914AEC7775D6C</GN_ID>
+         <ARTIST>Flying Lotus Feat. Laura Darlington</ARTIST>
+         <TITLE>Phantasm</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>17</TRACK_NUM>
+         <GN_ID>290247128-AAE4E2F3768FD4C6C4E92AB5ACC55E00</GN_ID>
+         <TITLE>Me Yesterday//Corded</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>18</TRACK_NUM>
+         <GN_ID>290247129-6D03F73E732426347145899C21FB1120</GN_ID>
+         <TITLE>Dream To Me</TITLE>
+      </TRACK>
+      <TRACK>
+         <TRACK_NUM>19</TRACK_NUM>
+         <GN_ID>290247130-DA87A6164BB34922D0D408CB408663E5</GN_ID>
+         <TITLE>The Things You Left</TITLE>
+      </TRACK>
+   </ALBUM>
+ </RESPONSE>
+                                                                                
+</RESPONSES>

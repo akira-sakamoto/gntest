@@ -27,6 +27,9 @@ namespace GracenoteXml.Model
         [System.Xml.Serialization.XmlAttribute("STATUS")]
         public String Status { get; set; }      // OK | NO_MATCH | ERROR
 
+        [System.Xml.Serialization.XmlElement("USER")]
+        public string User { get; set; }
+
         [System.Xml.Serialization.XmlElement("RANGE")]
         public RangeModel Range { get; set; }
 
@@ -135,9 +138,9 @@ namespace Gracenote
 
     public class WebApi
     {
-        //private static string _gnWebApi = "https://c{0}.web.cddbp.net/webapi/xml/1.0/";
+        private static string _gnWebApi = "https://c{0}.web.cddbp.net/webapi/xml/1.0/";
         //private static string _gnWebApi = "https://localhost/~asakamoto/posttest/receive.php";
-        private static string _gnWebApi = "http://localhost/~azira/posttest/receive.php";
+        //private static string _gnWebApi = "http://localhost/~azira/posttest/receive.php";
         private Settings appSettings;
         private string _userId;
         private string _lang;
@@ -223,7 +226,8 @@ namespace Gracenote
                     debugLog(errors.ResponseUri.ToString());
                     debugLog(errors.StatusCode + ":" + errors.StatusDescription);
                 } else {
-                    debugLog(ex.Message);        // TODO: エラー処理
+                    // TODO: エラー処理
+                    debugLog(ex.Message);        
                 }
             }
             finally {
@@ -241,7 +245,7 @@ namespace Gracenote
                     reader.Close();
                 dataStream.Close();
             response.Close();
-            
+
             return responseFromServer;                        
         }
 
@@ -254,7 +258,10 @@ namespace Gracenote
             string postData = "<QUERIES><QUERY CMD=\"REGISTER\">" + makeClientId() + "</QUERY></QUERIES>";
             string res = Post(postData);
             // TODO: xml解析
-            
+            MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(res));
+            GracenoteXml.Model.ResponsesModel xml = XMLtest1(ms);
+            // TODO: エラーチェック
+            SetUserId(XMLanalyze(xml));
         }
 
 
@@ -366,7 +373,106 @@ namespace Gracenote
 #endif
         }
 
+        // XML解析
+        static void XMLtest()
+        {
+            XMLtest("test/response_lotus.xml");
+        }
+        static GracenoteXml.Model.ResponsesModel XMLtest(string fileName)
+        {
+            System.IO.FileStream fs = null;
+            GracenoteXml.Model.ResponsesModel responses = null;
 
+            try {
+                fs = new System.IO.FileStream(fileName, System.IO.FileMode.Open);
+                System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
+                responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(fs);
+            }
+            catch (Exception ex) {
+                Console.WriteLine("ERROR: XMLtest({0})", fileName);
+            }
+            finally {
+                if (fs != null) {
+                    fs.Close();
+                }
+            }
+            return responses;
+        }
+        static GracenoteXml.Model.ResponsesModel XMLtest1(MemoryStream stream)
+        {
+            string s = Encoding.Unicode.GetString(stream.ToArray());
+Console.WriteLine("stream = {0}", s);
+debugLog("XMLtest:stream #1");
+            System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
+debugLog("XMLtest:stream #2");
+            GracenoteXml.Model.ResponsesModel responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(stream);
+debugLog("XMLtest:stream #3");
+            return responses;
+        }
+        static string XMLanalyze(GracenoteXml.Model.ResponsesModel responses)
+        {
+/*
+            System.IO.FileStream fs = new System.IO.FileStream(source, System.IO.FileMode.Open);
+            System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
+            GracenoteXml.Model.ResponsesModel responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(fs);
+*/
+debugLog("XMLanalize #1");
+            Console.WriteLine(String.Format("response = {0}, status = {1}", responses.Response, responses.Response.Status));
+            if (responses.Response.Status == "ERROR") {
+                Console.WriteLine(String.Format("message = {0}", responses.Message));
+                return null;
+            }
+            // Register response
+            if (responses.Response.User != "") {
+                debugLog("UserID = " + responses.Response.User);
+                return responses.Response.User;
+            }
+            
+            // Range exists
+            if (responses.Response.Range != null) {
+                GracenoteXml.Model.RangeModel range = (GracenoteXml.Model.RangeModel)responses.Response.Range;
+                Console.WriteLine(String.Format("RANGE: Count = {0}, Start = {1}, End = {2}", range.Count, range.Start, range.End));
+            }
+
+            // Album
+            foreach (GracenoteXml.Model.AlbumModel album in responses.Response.Album) {
+                Console.WriteLine(String.Format("ALBUM: ORD = {0}", album.Ord));
+                Console.WriteLine(String.Format("       GN_ID = {0}", album.Gn_id));
+                Console.WriteLine(String.Format("       ARTIST = {0}", album.Artist));
+                Console.WriteLine(String.Format("       TITLE = {0}", album.Title));
+            
+                Console.WriteLine(String.Format("       PKG_LANG = {0}", album.Pkg_lang));
+                Console.WriteLine(String.Format("       DATE = {0}", album.Date));
+                Console.WriteLine(String.Format("       MATCHED_TRACK_NUM = {0}", album.Matched_track_num));
+                Console.WriteLine(String.Format("       TRACK_COUNT = {0}", album.Track_count));
+
+                // album genre
+                foreach (GracenoteXml.Model.GenreModel aGenre in album.AGenre) {
+                    Console.WriteLine(String.Format("       aGENRE: ID = {0}, Text = {1}", aGenre.Id, aGenre.Text));
+                }
+
+
+                foreach (GracenoteXml.Model.TrackModel track in album.Track) {
+                    Console.WriteLine(String.Format("       TRACK: TRACK_NUM = {0}", track.Track_num));
+                    Console.WriteLine(String.Format("              GN_ID = {0}", track.Gn_id));
+                    Console.WriteLine(String.Format("              ARTIST = {0}", track.Artist));
+                    Console.WriteLine(String.Format("              TITLE = {0}", track.Title));
+
+                    foreach (GracenoteXml.Model.GenreModel tGenre in track.TGenre) {
+                        Console.WriteLine(String.Format("              tGENRE: ID = {0}, Text = {1}", tGenre.Id, tGenre.Text));
+                    }
+
+                    Console.WriteLine(String.Format("              URL = {0}", track.Url));
+                }
+
+                Console.WriteLine(String.Format("       URL1= {0}", album.Url));
+                Console.WriteLine("--");
+            }
+
+//            fs.Close();
+
+            return "dummy";
+        }
 
     }
 }

@@ -149,6 +149,7 @@ namespace Gracenote
          * コンストラクタ
          * 設定ファイル gnsetting.xml から clientId と clientTag を読み込む
          * アクセス用URL _gnWebApi を作る
+         *
          <?xml version="1.0" encoding="utf-8"?>
          <Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
            <clientId>XXXXXXXXXX</clientId>
@@ -157,6 +158,7 @@ namespace Gracenote
          */
         public WebApi()
         {
+            // Read configuration file
             const string configFile = "gnsetting.xml";
             System.IO.StreamReader sr = null;
 
@@ -345,6 +347,7 @@ namespace Gracenote
         {
             _userId = userId;
         }
+<<<<<<< HEAD
 
         /**
          * DEBUG
@@ -356,6 +359,9 @@ namespace Gracenote
             Console.WriteLine("UserID: {0}", _userId);
         }
 
+=======
+        
+>>>>>>> 2cd6f0d47e2eaf21cba9c399e27182144511be6e
         // make client id node
         private string makeClientId()
         {
@@ -381,6 +387,11 @@ namespace Gracenote
 #if (GNDEBUG)
             Console.Out.WriteLine("DEBUG: {0}", msg);
 #endif
+        }
+        public void showValue()
+        {
+            Console.WriteLine("gnWebAPI = {0}", _gnWebApi);
+            Console.WriteLine("userId   = {0}", _userId);
         }
 
         // XML解析
@@ -549,7 +560,11 @@ namespace ConsoleApplication
             gn = new Gracenote.WebApi();
 
             do {
+<<<<<<< HEAD
                 gn.showRegistrationInfo();  // debug
+=======
+                gn.showValue();
+>>>>>>> 2cd6f0d47e2eaf21cba9c399e27182144511be6e
                 Console.WriteLine("cmd: 1: Regist, 2: Enter _userId, 3: Query, 0: Exit");
                 Console.Write("> ");
                 cmd = int.Parse(Console.ReadLine());

@@ -259,9 +259,9 @@ namespace Gracenote
             string res = Post(postData);
             // TODO: xml解析
             MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(res));
-            GracenoteXml.Model.ResponsesModel xml = XMLtest1(ms);
+            GracenoteXml.Model.ResponsesModel xml = XMLtest(ms);
             // TODO: エラーチェック
-            SetUserId(XMLanalyze(xml));
+            setUserId(XMLanalyze(xml));
         }
 
 
@@ -346,6 +346,16 @@ namespace Gracenote
             _userId = userId;
         }
 
+        /**
+         * DEBUG
+         * show registration info
+         **/
+        public void showRegistrationInfo()
+        {
+            Console.WriteLine("ApiUrl: {0}", _gnWebApi);
+            Console.WriteLine("UserID: {0}", _userId);
+        }
+
         // make client id node
         private string makeClientId()
         {
@@ -398,10 +408,10 @@ namespace Gracenote
             }
             return responses;
         }
-        static GracenoteXml.Model.ResponsesModel XMLtest1(MemoryStream stream)
+        static GracenoteXml.Model.ResponsesModel XMLtest(MemoryStream stream)
         {
             string s = Encoding.Unicode.GetString(stream.ToArray());
-Console.WriteLine("stream = {0}", s);
+Console.WriteLine("XMLtest: stream = {0}", s);
 debugLog("XMLtest:stream #1");
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
 debugLog("XMLtest:stream #2");
@@ -425,6 +435,7 @@ debugLog("XMLanalize #1");
             // Register response
             if (responses.Response.User != "") {
                 debugLog("UserID = " + responses.Response.User);
+Console.WriteLine("user return");                
                 return responses.Response.User;
             }
             
@@ -538,6 +549,7 @@ namespace ConsoleApplication
             gn = new Gracenote.WebApi();
 
             do {
+                gn.showRegistrationInfo();  // debug
                 Console.WriteLine("cmd: 1: Regist, 2: Enter _userId, 3: Query, 0: Exit");
                 Console.Write("> ");
                 cmd = int.Parse(Console.ReadLine());

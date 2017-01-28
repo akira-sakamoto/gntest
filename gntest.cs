@@ -1,4 +1,10 @@
-﻿#define GNDEBUG
+﻿/**************************************************************
+ * GNTEST - a Gracenote Web API test Program
+ * Copyright: akira.sakamoto@gmail.com
+ * License: MIT
+ *************************************************************/
+
+#define GNDEBUG
 // https://msdn.microsoft.com/ja-jp/library/debx8sh9(v=vs.110).aspx
 using System;
 using System.Net;
@@ -6,7 +12,8 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.IO;
-
+//using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace GracenoteXml.Model
 {
@@ -122,6 +129,7 @@ namespace GracenoteXml.Model
  */
 namespace Gracenote
 {
+    // local storage
     public class Settings
     {
         private string _clientId;
@@ -136,6 +144,9 @@ namespace Gracenote
         }
     }
 
+    /**
+     * Gracenote Web API wrapper
+     */
     public class WebApi
     {
         private static string _gnWebApi = "https://c{0}.web.cddbp.net/webapi/xml/1.0/";
@@ -253,22 +264,51 @@ namespace Gracenote
 
 
         /**
-         * Register
+         * Gracenote Web API: Register
          */
         public void Register()
         {
             string postData = "<QUERIES><QUERY CMD=\"REGISTER\">" + makeClientId() + "</QUERY></QUERIES>";
             string res = Post(postData);
-            // TODO: xml解析
             MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(res));
-            GracenoteXml.Model.ResponsesModel xml = XMLtest(ms);
+            //GracenoteXml.Model.ResponsesModel xml = XMLtest(ms);
             // TODO: エラーチェック
-            setUserId(XMLanalyze(xml));
+            setUserId(XMLanalyze(ms));
+        }
+
+        /**
+         * userId を設定する
+         * @param {string} userId
+         */
+        public void setUserId(string userId)
+        {
+            _userId = userId;
+        }
+
+        /**
+         * set result language (3 char code)
+         * @param {string} lang
+         */
+        public void setLanguage(string lang)
+        {
+            _lang = lang;
+            debugLog("setLanguage: " + _lang);
+        }
+
+        /**
+         * DEBUG
+         * show registration info
+         */
+        public void showRegistrationInfo()
+        {
+            Console.WriteLine("ApiUrl: {0}", _gnWebApi);
+            Console.WriteLine("UserID: {0}", _userId);
+            Console.WriteLine("Lang:   {0}", _lang);
         }
 
 
         /**
-         * trackSearch
+         * Gracenote Web API: trackSearch
          * @param {string} artistName
          * @param {string} albumTitle
          * @param {string} trackTitle
@@ -280,14 +320,16 @@ namespace Gracenote
         }
         public void trackSearch(string artistName, string albumTitle, string trackTitle)
         {
-            trackSearch(artistName, albumTitle, trackTitle, "");
+            trackSearch(artistName, albumTitle, trackTitle, _lang);
         }
-        public void trackSearch(string artistName, string albumTitle, string trackTitle, string lang)
+        public void trackSearch(string artistName, string albumTitle, string trackTitle, string language)
         {
-            string query = "";
-
             if (_userId == "") {
                 debugLog("Error: no registratered");
+                return;
+            }
+            if (artistName == "" && albumTitle == "" && trackTitle == "") {
+                debugLog("parameter error: one of artistName, albumTitle or trackTitle must be set");
                 return;
             }
 /*
@@ -318,50 +360,31 @@ namespace Gracenote
               </QUERY> 
             </QUERIES>
 */
-            query += "<QUERIES>";
-            if (lang != "") { query +=  makeNode("LANG", lang); }
-            query +=   "<AUTH>";
-            query +=     makeClientId();
-            query +=     makeNode("USER", _userId);
-            query +=   "</AUTH>";
-            query +=   "<QUERY CMD=\"ALBUM_SEARCH\">";
-            if (artistName == "" && albumTitle == "" && trackTitle == "") {
-                debugLog("parameter error: one of artistName, albumTitle or trackTitle must be set");
-                return;
-            }
+            // make query string
+            string queries = "";
+            string query = "";
+            string lang = (language != "") ? makeNode("LANG", language) : "";
+            string auth = makeNode("AUTH", makeClientId() + makeNode("USER", _userId));
             if (artistName != "") { query += makeNode("TEXT", "TYPE=\"ARTIST\"", artistName); }
             if (albumTitle != "") { query += makeNode("TEXT", "TYPE=\"ALBUM_TITLE\"", albumTitle); }
             if (trackTitle != "") { query += makeNode("TEXT", "TYPE=\"TRACK_TITLE\"", trackTitle); }
             // TODO: set option
-            query +=   "</QUERY>";
-            query += "</QUERIES>";
+            query   = makeNode("QUERY", "CMD=\"ALBUM_SEARCH\"", lang + query);
+            queries = makeNode("QUERIES", auth + query);
 
-            Post(query);
+            // post query
+            string res = Post(queries);
+//Console.WriteLine("res = {0}", res);
+            // receive result
+            MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(res));
+            string s = XMLanalyze(ms);
+
+Console.WriteLine("result = {0}", s);
         }
 
-        /**
-         * userId を設定する
-         * @param {string} userId
-         */
-        public void setUserId(string userId)
-        {
-            _userId = userId;
-        }
-<<<<<<< HEAD
 
-        /**
-         * DEBUG
-         * show registration info
-         **/
-        public void showRegistrationInfo()
-        {
-            Console.WriteLine("ApiUrl: {0}", _gnWebApi);
-            Console.WriteLine("UserID: {0}", _userId);
-        }
 
-=======
         
->>>>>>> 2cd6f0d47e2eaf21cba9c399e27182144511be6e
         // make client id node
         private string makeClientId()
         {
@@ -381,55 +404,23 @@ namespace Gracenote
             return pre + value + "</" + node + ">";
         }
 
-        // output to stdout
-        public static void debugLog(string msg)
-        {
-#if (GNDEBUG)
-            Console.Out.WriteLine("DEBUG: {0}", msg);
-#endif
-        }
-        public void showValue()
-        {
-            Console.WriteLine("gnWebAPI = {0}", _gnWebApi);
-            Console.WriteLine("userId   = {0}", _userId);
-        }
 
-        // XML解析
-        static void XMLtest()
+        /**
+         * XMLanalyze - analyze responses in memory stream
+         * @param {stream} responses in memory stream
+         */
+        static string XMLanalyze(MemoryStream stream)
         {
-            XMLtest("test/response_lotus.xml");
-        }
-        static GracenoteXml.Model.ResponsesModel XMLtest(string fileName)
-        {
-            System.IO.FileStream fs = null;
-            GracenoteXml.Model.ResponsesModel responses = null;
-
-            try {
-                fs = new System.IO.FileStream(fileName, System.IO.FileMode.Open);
-                System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
-                responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(fs);
-            }
-            catch (Exception ex) {
-                Console.WriteLine("ERROR: XMLtest({0})", fileName);
-            }
-            finally {
-                if (fs != null) {
-                    fs.Close();
-                }
-            }
-            return responses;
-        }
-        static GracenoteXml.Model.ResponsesModel XMLtest(MemoryStream stream)
-        {
-            string s = Encoding.Unicode.GetString(stream.ToArray());
-Console.WriteLine("XMLtest: stream = {0}", s);
-debugLog("XMLtest:stream #1");
+debugLog("XMLanalyze:MemoryStream");            
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
-debugLog("XMLtest:stream #2");
             GracenoteXml.Model.ResponsesModel responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(stream);
-debugLog("XMLtest:stream #3");
-            return responses;
+            return XMLanalyze(responses);
         }
+
+        /**
+         * XMLanalyze - analyze responses in XML
+         * @param {responses} XML
+         */
         static string XMLanalyze(GracenoteXml.Model.ResponsesModel responses)
         {
 /*
@@ -444,9 +435,8 @@ debugLog("XMLanalize #1");
                 return null;
             }
             // Register response
-            if (responses.Response.User != "") {
-                debugLog("UserID = " + responses.Response.User);
-Console.WriteLine("user return");                
+            if (responses.Response.User != null) {
+                debugLog("Register Response: UserID = " + responses.Response.User);
                 return responses.Response.User;
             }
             
@@ -496,10 +486,33 @@ Console.WriteLine("user return");
             return "dummy";
         }
 
+
+        /*
+        TODO:
+            getAlbumList    アルバムリストを返す
+            getAlbum(index) 指定番号のアルバムを返す
+            getArtist       アーティスト情報を返す
+            getTitle(index) アルバム内のタイトルを返す
+        */
+
+        // output debug message to stdout
+        // [CallerFilePath] string path = ""
+        public static void debugLog(
+            string msg,
+            [CallerMemberName] string name = "",
+            [CallerLineNumber] int num = 0)
+        {
+#if (GNDEBUG)
+            Console.Out.WriteLine("DEBUG: {0} {1} {2}", name, num, msg);
+#endif
+        }
+
     }
 }
 
 
+
+// main test program
 namespace ConsoleApplication
 {
     public class Program
@@ -507,30 +520,11 @@ namespace ConsoleApplication
         private static Gracenote.WebApi gn = null;
 
         
-        // Register Test
-        public static void registTest()
-        {
-            gn.Register();
-        }
-
-
-        // Enter userId
-        public static void test2()
-        {
-            string id = "";
-
-            do {
-                Console.Write("Enter userId: ");
-                id = Console.ReadLine();
-            } while (id == "");
-            gn.setUserId(id);
-        }
 
 
 
 
-
-        public static void test3()
+        public static void queryTest()
         {
             string artistName = "";
             string albumTitle = "";
@@ -556,27 +550,48 @@ namespace ConsoleApplication
         public static void Main(string[] args)
         {
             int cmd;
+            string str;
 
             gn = new Gracenote.WebApi();
 
             do {
-<<<<<<< HEAD
+                Console.WriteLine();
                 gn.showRegistrationInfo();  // debug
-=======
-                gn.showValue();
->>>>>>> 2cd6f0d47e2eaf21cba9c399e27182144511be6e
-                Console.WriteLine("cmd: 1: Regist, 2: Enter _userId, 3: Query, 0: Exit");
+                Console.WriteLine("cmd: 1: Regist, 2: Enter userId, 3: Enter Language, 4: Query, 0: Exit");
                 Console.Write("> ");
-                cmd = int.Parse(Console.ReadLine());
+                str = "";
+                try {
+                    cmd = int.Parse(Console.ReadLine());
+                }
+                catch (Exception) {
+                    cmd = -1;
+                }
                 switch (cmd) {
                     case 1:
-                        registTest();
+                        // Regist clientId and receive userId
+                        gn.Register();
                         break;
+
                     case 2:
-                        test2();
+                        // set userID manually
+                        do {
+                            Console.Write("Enter userId: ");
+                            str = Console.ReadLine();
+                        } while (str == "");
+                        gn.setUserId(str);
                         break;
+                        
                     case 3:
-                        test3();
+                        // set result language
+                        do {
+                            Console.Write("Enter language (3 char code): ");
+                            str = Console.ReadLine();
+                        } while (str == "");
+                        gn.setLanguage(str);
+                        break;
+
+                    case 4:
+                        queryTest();
                         break;
                 }
             } while (cmd != 0);

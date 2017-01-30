@@ -186,6 +186,22 @@ namespace Gracenote
         }
     }
 
+    /// <summary>Reng parameter</summary>
+    public class OptRange 
+    {
+        public int count { get; set; }
+        public int start { get; set; }
+        public int end { get; set; }
+
+        /// <summary>Constructor</summary>
+        public OptRange()
+        {
+            count = 0;
+            start = 0;
+            end = 0;
+        }
+    }
+
 
     /// <summary>
     ///   Gracenote Web API wrapper
@@ -233,12 +249,11 @@ namespace Gracenote
                 if (sr != null) {
                     sr.Close();
                 }
+                // make correct api address
+                _gnWebApi = _gnWebApi.Replace("{0}", appSettings.clientId);
+                _userId = "";
+                _lang = "";
             }
-
-            // make correct api address
-            _gnWebApi = _gnWebApi.Replace("{0}", appSettings.clientId);
-            _userId = "";
-            _lang = "";
         }
 
 
@@ -300,13 +315,17 @@ namespace Gracenote
                 // TODO: エラー処理
 
                 dataStream = response.GetResponseStream();
+debugLog("Post #1");
                     StreamReader reader = new StreamReader(dataStream);
+debugLog("Post #2");
                         string responseFromServer = reader.ReadToEnd();
+debugLog("Post #3 " + responseFromServer);
                     reader.Close();
                 dataStream.Close();
             response.Close();
-
+debugLog("Post #4");
             MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(responseFromServer));
+debugLog("Post #5");
             return Ms2Xml(ms);
         }
 
@@ -402,6 +421,15 @@ namespace Gracenote
         /// <returns>XML result</returns>
         public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language)
         {
+            OptRange range = new OptRange();
+            return trackSearch(artistName, albumTitle, trackTitle, language, range);
+        }
+        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, OptRange range)
+        {
+            return trackSearch(artistName, albumTitle, trackTitle, "", range);
+        }
+        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language, OptRange range)
+        {
             if (_userId == "") {
                 debugLog("Error: no registratered");
                 return null;
@@ -420,7 +448,11 @@ namespace Gracenote
             if (albumTitle != "") { query += makeNode("TEXT", "TYPE=\"ALBUM_TITLE\"", albumTitle); }
             if (trackTitle != "") { query += makeNode("TEXT", "TYPE=\"TRACK_TITLE\"", trackTitle); }
             // TODO: set option
-            query   = makeNode("QUERY", "CMD=\"ALBUM_SEARCH\"", lang + query);
+            string optRange = "";
+            if (range.count != 0 && range.start != 0 && range.end != 0) {
+                optRange = makeNode("RANGE", makeNode("START", range.start) + makeNode("END", range.end));
+            }
+            query   = makeNode("QUERY", "CMD=\"ALBUM_SEARCH\"", lang + optRange + query);
             queries = makeNode("QUERIES", auth + query);
 
             // post query
@@ -428,6 +460,7 @@ namespace Gracenote
 
             return responses;
         }
+
 
         // make client id node
         private string makeClientId()
@@ -439,6 +472,10 @@ namespace Gracenote
         private string makeNode(string node, string value)
         {
             return makeNode(node, "", value);
+        }
+        private string makeNode(string node, int value)
+        {
+            return makeNode(node, value.ToString());
         }
 
         // maake xml node <NODE OPT>VALUE</NODE>
@@ -454,8 +491,11 @@ namespace Gracenote
          */
         public static GracenoteXml.Model.ResponsesModel Ms2Xml(MemoryStream stream)
         {
+debugLog("Ms2Xml #1");
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
+debugLog("Ms2Xml #2");
             GracenoteXml.Model.ResponsesModel responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(stream);
+debugLog("Ms2Xml #3");
             return responses;
         }
 
@@ -609,8 +649,9 @@ Console.WriteLine(string.Format("response = {0}, status = {1}", responses.Respon
         }
 
     }
-}
 
+
+}
 
 
 // main test program
@@ -628,6 +669,7 @@ namespace ConsoleApplication
             string artistName = "";
             string albumTitle = "";
             string trackTitle = "";
+            Gracenote.OptRange optRange = new Gracenote.OptRange();
 
             do {
                 Console.Write("artistName: ");
@@ -639,10 +681,19 @@ namespace ConsoleApplication
                 Console.Write("trackTitle: ");
                 trackTitle = Console.ReadLine();
 
+                Console.Write("startRange: ");
+                optRange.start = int.Parse(Console.ReadLine());
+
+                Console.Write("endRange:   ");
+                optRange.end = int.Parse(Console.ReadLine());
+
+                Console.Write("countRange: ");
+                optRange.count = int.Parse(Console.ReadLine());
+
                 Console.WriteLine();
             } while (artistName == "" && albumTitle == "" && trackTitle == "");
 
-            GracenoteXml.Model.ResponsesModel res = gn.trackSearch(artistName, albumTitle, trackTitle);
+            GracenoteXml.Model.ResponsesModel res = gn.trackSearch(artistName, albumTitle, trackTitle, optRange);
 
             switch (gn.getStatus(res)) {
                 case "OK":

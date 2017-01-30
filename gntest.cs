@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 namespace GracenoteXml.Model
 {
     /// <summary>XML definition for Web API responses</summary>
+    [System.Xml.Serialization.XmlRoot("RESPONSES")]
     public class ResponsesModel
     {
         /// <summary>query responses</summary>

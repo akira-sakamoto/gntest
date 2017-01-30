@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 namespace GracenoteXml.Model
 {
     /// <summary>XML definition for Web API responses</summary>
+    [System.Xml.Serialization.XmlRoot("RESPONSES")]
     public class ResponsesModel
     {
         /// <summary>query responses</summary>
@@ -663,6 +664,17 @@ namespace ConsoleApplication
         // web api instance
         private static Gracenote.WebApi gn = null;
 
+        private static int Str2Int(string str)
+        {
+            int n = 0;
+            try {
+                n = int.Parse(str);
+            }
+            catch (Exception) {
+                n = 0;
+            }
+            return n;
+        }
         /// <summary>Query test entry</summary>
         public static void queryTest()
         {
@@ -682,13 +694,13 @@ namespace ConsoleApplication
                 trackTitle = Console.ReadLine();
 
                 Console.Write("startRange: ");
-                optRange.start = int.Parse(Console.ReadLine());
+                optRange.start = Str2Int(Console.ReadLine());
 
                 Console.Write("endRange:   ");
-                optRange.end = int.Parse(Console.ReadLine());
+                optRange.end = Str2Int(Console.ReadLine());
 
                 Console.Write("countRange: ");
-                optRange.count = int.Parse(Console.ReadLine());
+                optRange.count = Str2Int(Console.ReadLine());
 
                 Console.WriteLine();
             } while (artistName == "" && albumTitle == "" && trackTitle == "");

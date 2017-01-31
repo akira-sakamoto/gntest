@@ -1,9 +1,8 @@
-﻿// <summary>
-// GNTEST - a Gracenote Web API test Program
-// Copyright: akira.sakamoto@gmail.com
-// License: MIT
-// reference: https://msdn.microsoft.com/ja-jp/library/debx8sh9(v=vs.110).aspx
-// </summary>
+﻿/*
+ * GNTEST - a Gracenote Web API test Program
+ * Copyright: akira.sakamoto@gmail.com
+ * License: MIT
+ */
 
 #define GNDEBUG
 using System;
@@ -190,17 +189,13 @@ namespace Gracenote
     /// <summary>Reng parameter</summary>
     public class OptRange 
     {
-        public int count { get; set; }
-        public int start { get; set; }
-        public int end { get; set; }
+        /// <summary>Range Start</summary>
+        public int Start { get; set; }
+        /// <summary>Range End</summary>
+        public int End { get; set; }
 
         /// <summary>Constructor</summary>
-        public OptRange()
-        {
-            count = 0;
-            start = 0;
-            end = 0;
-        }
+        public OptRange() { Start = End = 0; }
     }
 
 
@@ -241,17 +236,17 @@ namespace Gracenote
             try {
                 sr = new System.IO.StreamReader(configFile, new System.Text.UTF8Encoding(false));
                 appSettings = (Settings)gnSettings.Deserialize(sr);
+                _gnWebApi = _gnWebApi.Replace("{0}", appSettings.clientId);
             }
             catch (Exception) {
                 Console.WriteLine("ERROR: could not read {0}", configFile);
+                _gnWebApi = "";     // error result
                 return;
             }
             finally {
                 if (sr != null) {
                     sr.Close();
                 }
-                // make correct api address
-                _gnWebApi = _gnWebApi.Replace("{0}", appSettings.clientId);
                 _userId = "";
                 _lang = "";
             }
@@ -316,23 +311,19 @@ namespace Gracenote
                 // TODO: エラー処理
 
                 dataStream = response.GetResponseStream();
-debugLog("Post #1");
                     StreamReader reader = new StreamReader(dataStream);
-debugLog("Post #2");
                         string responseFromServer = reader.ReadToEnd();
-debugLog("Post #3 " + responseFromServer);
+//debugLog("Post #3 " + responseFromServer);
                     reader.Close();
                 dataStream.Close();
             response.Close();
-debugLog("Post #4");
             MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(responseFromServer));
-debugLog("Post #5");
             return Ms2Xml(ms);
         }
 
-        /**
-         * get response status
-         */
+        /// <summary>get response status</summary>
+        /// <param name="responses">responses which is received from API</param>
+        /// <returns>response status</returns>
         public string getStatus(GracenoteXml.Model.ResponsesModel responses)
         {
             debugLog("STATUS:  " + responses.Response.Status);
@@ -341,9 +332,7 @@ debugLog("Post #5");
         }
 
 
-        /**
-         * Gracenote Web API: Register
-         */
+        /// <summary>Register clientId and receive userId</summary>
         public void Register()
         {
             string postData = makeNode("QUERIES", makeNode("QUERY", "CMD=\"REGISTER\"", makeClientId()));
@@ -358,36 +347,30 @@ debugLog("Post #5");
             }
         }
 
-        /**
-         * userId を設定する
-         * @param {string} userId
-         */
+
+         /// <summary>set userId</summary>
+         /// <param name="userId">userId receieved from Web Api</param>
         public void setUserId(string userId)
         {
             _userId = userId;
         }
 
-        /**
-         * set result language (3 char code: eng, jpn,..)
-         * @param {string} lang
-         */
+        /// <summary>set result language</summary>
+        /// <param name="lang">language code</param>
+        /// <remarks>three-character language code as defined by ISO 639-2</remarks>
         public void setLanguage(string lang)
         {
             _lang = lang;
             debugLog("setLanguage: " + _lang);
         }
 
-        /**
-         * DEBUG
-         * show registration info
-         */
+        /// <summary>DEBUG: show registration info</summary>
         public void showRegistrationInfo()
         {
             Console.WriteLine("ApiUrl: {0}", _gnWebApi);
             Console.WriteLine("UserID: {0}", _userId);
             Console.WriteLine("Lang:   {0}", _lang);
         }
-
 
         
         /// <summary>
@@ -425,10 +408,29 @@ debugLog("Post #5");
             OptRange range = new OptRange();
             return trackSearch(artistName, albumTitle, trackTitle, language, range);
         }
+
+        /// <summary>
+        /// Gracenote Web API: Track Search with artist name, album title, track title, and range
+        /// </summary>
+        /// <param name="artistName">Artist name to query</param>
+        /// <param name="albumTitle">Album title to query</param>
+        /// <param name="trackTitle">Track title to query</param>
+        /// <param name="range">Range specified by Start and End</param>
+        /// <returns>XML result</returns>
         public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, OptRange range)
         {
             return trackSearch(artistName, albumTitle, trackTitle, "", range);
         }
+
+        /// <summary>
+        /// Gracenote Web API: Track Search with artist name, album title, track title, language, and range
+        /// </summary>
+        /// <param name="artistName">Artist name to query</param>
+        /// <param name="albumTitle">Album title to query</param>
+        /// <param name="trackTitle">Track title to query</param>
+        /// <param name="language">Language, want to return</param>
+        /// <param name="range">Range specified by Start and End</param>
+        /// <returns>XML result</returns>
         public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language, OptRange range)
         {
             if (_userId == "") {
@@ -439,7 +441,6 @@ debugLog("Post #5");
                 debugLog("parameter error: one of artistName, albumTitle or trackTitle must be set");
                 return null;
             }
-
             // make query string
             string queries = "";
             string query = "";
@@ -450,8 +451,8 @@ debugLog("Post #5");
             if (trackTitle != "") { query += makeNode("TEXT", "TYPE=\"TRACK_TITLE\"", trackTitle); }
             // TODO: set option
             string optRange = "";
-            if (range.count != 0 && range.start != 0 && range.end != 0) {
-                optRange = makeNode("RANGE", makeNode("START", range.start) + makeNode("END", range.end));
+            if (range.Start != 0 && range.End != 0) {
+                optRange = makeNode("RANGE", makeNode("START", range.Start) + makeNode("END", range.End));
             }
             query   = makeNode("QUERY", "CMD=\"ALBUM_SEARCH\"", lang + optRange + query);
             queries = makeNode("QUERIES", auth + query);
@@ -487,94 +488,15 @@ debugLog("Post #5");
         }
 
 
-        /**
-         * convert MemoryStream to XML
-         */
+        /// <summary>convert MemoryStream to XML</summary>
+        /// <param name="stream">MemoryStream</param>
+        /// <returns>XML result</returns>
         public static GracenoteXml.Model.ResponsesModel Ms2Xml(MemoryStream stream)
         {
-debugLog("Ms2Xml #1");
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(GracenoteXml.Model.ResponsesModel));
-debugLog("Ms2Xml #2");
             GracenoteXml.Model.ResponsesModel responses = (GracenoteXml.Model.ResponsesModel)serializer.Deserialize(stream);
-debugLog("Ms2Xml #3");
             return responses;
         }
-
-
-        /**
-         * XMLanalyze - analyze responses in memory stream
-         * @param {stream} responses in memory stream
-         */
-        static string XMLanalyze(MemoryStream stream)
-        {
-            return XMLanalyze(Ms2Xml(stream)); 
-        }
-
-        /**
-         * XMLanalyze - analyze responses in XML
-         * @param {responses} XML
-         * @return  NULL: エラー
-         */
-        static string XMLanalyze(GracenoteXml.Model.ResponsesModel responses)
-        {
-Console.WriteLine(string.Format("response = {0}, status = {1}", responses.Response, responses.Response.Status));
-            // check status
-            if (responses.Response.Status == "ERROR" || responses.Response.Status == "NO_MATCH") {
-                Console.WriteLine(string.Format("message = {0}", responses.Message));
-                return responses.Response.Status;       // ERROR or NO_MATCH
-            }
-            // Register response
-            if (responses.Response.User != null) {
-                debugLog("Register Response: UserID = " + responses.Response.User);
-                return responses.Response.User;
-            }
-            
-            // Range exists
-            if (responses.Response.Range != null) {
-                GracenoteXml.Model.RangeModel range = (GracenoteXml.Model.RangeModel)responses.Response.Range;
-                Console.WriteLine(string.Format("RANGE: Count = {0}, Start = {1}, End = {2}", range.Count, range.Start, range.End));
-            }
-/*
-            // Album
-            foreach (GracenoteXml.Model.AlbumModel album in responses.Response.Album) {
-                Console.WriteLine(string.Format("ALBUM: ORD = {0}", album.Ord));
-                Console.WriteLine(string.Format("       GN_ID = {0}", album.Gn_id));
-                Console.WriteLine(string.Format("       ARTIST = {0}", album.Artist));
-                Console.WriteLine(string.Format("       TITLE = {0}", album.Title));
-            
-                Console.WriteLine(string.Format("       PKG_LANG = {0}", album.Pkg_lang));
-                Console.WriteLine(string.Format("       DATE = {0}", album.Date));
-                Console.WriteLine(string.Format("       MATCHED_TRACK_NUM = {0}", album.Matched_track_num));
-                Console.WriteLine(string.Format("       TRACK_COUNT = {0}", album.Track_count));
-
-                // album genre
-                foreach (GracenoteXml.Model.GenreModel aGenre in album.AGenre) {
-                    Console.WriteLine(string.Format("       aGENRE: ID = {0}, Text = {1}", aGenre.Id, aGenre.Text));
-                }
-
-
-                foreach (GracenoteXml.Model.TrackModel track in album.Track) {
-                    Console.WriteLine(string.Format("       TRACK: TRACK_NUM = {0}", track.Track_num));
-                    Console.WriteLine(string.Format("              GN_ID = {0}", track.Gn_id));
-                    Console.WriteLine(string.Format("              ARTIST = {0}", track.Artist));
-                    Console.WriteLine(string.Format("              TITLE = {0}", track.Title));
-
-                    foreach (GracenoteXml.Model.GenreModel tGenre in track.TGenre) {
-                        Console.WriteLine(string.Format("              tGENRE: ID = {0}, Text = {1}", tGenre.Id, tGenre.Text));
-                    }
-
-                    Console.WriteLine(string.Format("              URL = {0}", track.Url));
-                }
-
-                Console.WriteLine(string.Format("       URL1= {0}", album.Url));
-                Console.WriteLine("--");
-            }
-*/
-//            fs.Close();
-
-            return "dummy";
-        }
-
 
         /*
         TODO:
@@ -616,38 +538,65 @@ Console.WriteLine(string.Format("response = {0}, status = {1}", responses.Respon
         {
            // Album
             foreach (GracenoteXml.Model.AlbumModel album in albumList) {
-                Console.WriteLine(string.Format("ALBUM: ORD = {0}", album.Ord));
-                Console.WriteLine(string.Format("       GN_ID = {0}", album.Gn_id));
-                Console.WriteLine(string.Format("       ARTIST = {0}", album.Artist));
-                Console.WriteLine(string.Format("       TITLE = {0}", album.Title));
+                Console.WriteLine("ALBUM: ORD = {0}", album.Ord);
+                Console.WriteLine("       GN_ID = {0}", album.Gn_id);
+                Console.WriteLine("       ARTIST = {0}", album.Artist);
+                Console.WriteLine("       TITLE = {0}", album.Title);
             
-                Console.WriteLine(string.Format("       PKG_LANG = {0}", album.Pkg_lang));
-                Console.WriteLine(string.Format("       DATE = {0}", album.Date));
-                Console.WriteLine(string.Format("       MATCHED_TRACK_NUM = {0}", album.Matched_track_num));
-                Console.WriteLine(string.Format("       TRACK_COUNT = {0}", album.Track_count));
+                Console.WriteLine("       PKG_LANG = {0}", album.Pkg_lang);
+                Console.WriteLine("       DATE = {0}", album.Date);
+                Console.WriteLine("       MATCHED_TRACK_NUM = {0}", album.Matched_track_num);
+                Console.WriteLine("       TRACK_COUNT = {0}", album.Track_count);
 
                 // album genre
                 foreach (GracenoteXml.Model.GenreModel aGenre in album.AGenre) {
-                    Console.WriteLine(string.Format("       aGENRE: ID = {0}, Text = {1}", aGenre.Id, aGenre.Text));
+                    Console.WriteLine("       aGENRE: ID = {0}, Text = {1}", aGenre.Id, aGenre.Text);
                 }
 
                 foreach (GracenoteXml.Model.TrackModel track in album.Track) {
-                    Console.WriteLine(string.Format("       TRACK: TRACK_NUM = {0}", track.Track_num));
-                    Console.WriteLine(string.Format("              GN_ID = {0}", track.Gn_id));
-                    Console.WriteLine(string.Format("              ARTIST = {0}", track.Artist));
-                    Console.WriteLine(string.Format("              TITLE = {0}", track.Title));
+                    Console.WriteLine("       TRACK: TRACK_NUM = {0}", track.Track_num);
+                    Console.WriteLine("              GN_ID = {0}", track.Gn_id);
+                    Console.WriteLine("              ARTIST = {0}", track.Artist);
+                    Console.WriteLine("              TITLE = {0}", track.Title);
 
                     foreach (GracenoteXml.Model.GenreModel tGenre in track.TGenre) {
-                        Console.WriteLine(string.Format("              tGENRE: ID = {0}, Text = {1}", tGenre.Id, tGenre.Text));
+                        Console.WriteLine("              tGENRE: ID = {0}, Text = {1}", tGenre.Id, tGenre.Text);
                     }
 
-                    Console.WriteLine(string.Format("              URL = {0}", track.Url));
+                    Console.WriteLine("              URL = {0}", track.Url);
                 }
 
-                Console.WriteLine(string.Format("       URL1= {0}", album.Url));
+                Console.WriteLine("       URL1= {0}", album.Url);
                 Console.WriteLine("--");
             }
         }
+
+
+        /// <summary>
+        /// dump album list
+        /// </summary>
+        public void CsvAlbum(List<GracenoteXml.Model.AlbumModel> albumList)
+        {
+            string aNum, aTitle, aArtist;
+            string tNum, tTitle, tArtist;
+
+           // Album
+            foreach (GracenoteXml.Model.AlbumModel album in albumList) {
+                aNum = album.Ord;
+                aArtist = album.Artist;
+                aTitle = album.Title;
+
+                foreach (GracenoteXml.Model.TrackModel track in album.Track) {
+                    tNum = track.Track_num;
+                    tArtist = track.Artist;
+                    tTitle = track.Title;
+
+                    Console.WriteLine("{0}, \"{1}\", \"{2}\", {3}, \"{4}\", \"{5}\"", aNum, aArtist, aTitle, tNum, tArtist, tTitle);
+                }
+                Console.WriteLine();
+            }
+        }
+
 
     }
 
@@ -694,13 +643,10 @@ namespace ConsoleApplication
                 trackTitle = Console.ReadLine();
 
                 Console.Write("startRange: ");
-                optRange.start = Str2Int(Console.ReadLine());
+                optRange.Start = Str2Int(Console.ReadLine());
 
                 Console.Write("endRange:   ");
-                optRange.end = Str2Int(Console.ReadLine());
-
-                Console.Write("countRange: ");
-                optRange.count = Str2Int(Console.ReadLine());
+                optRange.End = Str2Int(Console.ReadLine());
 
                 Console.WriteLine();
             } while (artistName == "" && albumTitle == "" && trackTitle == "");
@@ -712,9 +658,10 @@ namespace ConsoleApplication
                     Console.WriteLine("Status: OK");
                     if (res.Response.Range != null) {
                         GracenoteXml.Model.RangeModel range = (GracenoteXml.Model.RangeModel)res.Response.Range;
-                        Console.WriteLine(string.Format("RANGE: Count = {0}, Start = {1}, End = {2}", range.Count, range.Start, range.End));
+                        Console.WriteLine("RANGE: Count = {0}, Start = {1}, End = {2}", range.Count, range.Start, range.End);
                     }
-                    gn.ListAlbum(res.Response.Album);
+                    // gn.ListAlbum(res.Response.Album);
+                    gn.CsvAlbum(res.Response.Album);
                     break;
 
                 case "NO_MATCH":

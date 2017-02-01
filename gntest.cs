@@ -405,8 +405,7 @@ namespace Gracenote
         /// <returns>XML result</returns>
         public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language)
         {
-            OptRange range = new OptRange();
-            return trackSearch(artistName, albumTitle, trackTitle, language, range);
+            return trackSearch(artistName, albumTitle, trackTitle, language, null);
         }
 
         /// <summary>
@@ -415,11 +414,11 @@ namespace Gracenote
         /// <param name="artistName">Artist name to query</param>
         /// <param name="albumTitle">Album title to query</param>
         /// <param name="trackTitle">Track title to query</param>
-        /// <param name="range">Range specified by Start and End</param>
+        /// <param name="optRange">Range specified by Start and End</param>
         /// <returns>XML result</returns>
-        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, OptRange range)
+        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, OptRange optRange)
         {
-            return trackSearch(artistName, albumTitle, trackTitle, "", range);
+            return trackSearch(artistName, albumTitle, trackTitle, "", optRange);
         }
 
         /// <summary>
@@ -429,9 +428,9 @@ namespace Gracenote
         /// <param name="albumTitle">Album title to query</param>
         /// <param name="trackTitle">Track title to query</param>
         /// <param name="language">Language, want to return</param>
-        /// <param name="range">Range specified by Start and End</param>
+        /// <param name="optRange">Range specified by Start and End</param>
         /// <returns>XML result</returns>
-        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language, OptRange range)
+        public GracenoteXml.Model.ResponsesModel trackSearch(string artistName, string albumTitle, string trackTitle, string language, OptRange optRange)
         {
             if (_userId == "") {
                 debugLog("Error: no registratered");
@@ -446,7 +445,7 @@ namespace Gracenote
             if (artistName != "") { body += makeNode("TEXT", "TYPE=\"ARTIST\"", artistName); }
             if (albumTitle != "") { body += makeNode("TEXT", "TYPE=\"ALBUM_TITLE\"", albumTitle); }
             if (trackTitle != "") { body += makeNode("TEXT", "TYPE=\"TRACK_TITLE\"", trackTitle); }
-            string query   = makeQuery("ALBUM_SEARCH", body, language, range);
+            string query   = makeQuery("ALBUM_SEARCH", body, language, optRange);
             string queries = makeNode("QUERIES", makeAuth() + query);
 
             // post query
@@ -468,32 +467,77 @@ namespace Gracenote
         {
             return makeNode("QUERY", "CMD=\"" + cmd + "\"", body);
         }
-        private string makeQuery(string cmd, string body, string language, OptRange range)
+
+        /// <summary>make query string</summary>
+        /// <param name="cmd">CMD parameter</param>
+        /// <param name="body">query body</param>
+        /// <param name="language">result language</param>
+        /// <param name="optRange">query range</param>
+        /// <remarks>optRange can accept null, if not necessary</remarks>
+        /// <returns>query string</returns>
+        private string makeQuery(string cmd, string body, string language, OptRange optRange)
         {
             // make query string
             string lang = (language != "") ? makeNode("LANG", language) : "";
             // TODO: set option
-            string optRange = "";
-            if (range.Start != 0 && range.End != 0) {
-                optRange = makeNode("RANGE", makeNode("START", range.Start) + makeNode("END", range.End));
+            string range = "";
+            if (optRange != null && (optRange.Start != 0 && optRange.End != 0)) {
+                range = makeNode("RANGE", makeNode("START", optRange.Start) + makeNode("END", optRange.End));
             }
             
-            return makeQuery(cmd, lang + optRange + body);
+            return makeQuery(cmd, lang + range + body);
         }
-        /// <summary>Album Fetch</summary>
-        /// <param name="gnid">Gracenote Album ID to fetch</param>
 
+        /**
+        <summary>Album Fetch</summary>
+        <param name="gnid">Gracenote Album ID to fetch</param>
+        <example>
+        <code>
+        <![CDATA[
+        <QUERIES>
+          <AUTH>
+            <CLIENT>client_id_string</CLIENT>
+            <USER>user_id_string</USER>
+          </AUTH>
+          <LANG>eng</LANG>
+          <COUNTRY>usa</COUNTRY>
+          <QUERY CMD="ALBUM_FETCH">
+            <GN_ID>a_gracenote_identifier</GN_ID>
+          </QUERY>
+        </QUERIES>
+        ]]>
+        </code>
+        </example>
+        */
         public GracenoteXml.Model.ResponsesModel albumFetch(string gnid)
         {
-            string query = "";
-
-            // query
-//            query = makeQuery("ALBUM_FETCH", lang + optRange + query);
-            // queries
-//            string queries = makeNode("QUERIES", makeAuth() + query);
-            return null;
+            return albumFetch(gnid, "", null);
         }
 
+        /// <summary>Album Fetch with 3 parameters</summary>
+        /// <param name="gnid">Gracenote Album ID to fetch</param>
+        /// <param name="language">result language</param>
+        /// <param name="optRange">query range</param>
+        /// <returns>responses</returns>
+        public GracenoteXml.Model.ResponsesModel albumFetch(string gnid, string language, OptRange optRange)
+        {
+            if (_userId == "") {
+                debugLog("Error: no registratered");
+                return null;
+            }
+            if (gnid == "") {
+                debugLog("parameter error: gnid is not specified");
+                return null;
+            }
+            // query body
+            string body = makeNode("GN_ID", gnid);
+            string query   = makeQuery("ALBUM_FETCH", body, language, optRange);
+            string queries = makeNode("QUERIES", makeAuth() + query);
+
+            // post query
+            GracenoteXml.Model.ResponsesModel responses = Post(queries);
+            return responses;
+        }
 
         // make client id node
         private string makeClientId()
@@ -565,6 +609,7 @@ namespace Gracenote
         /// <summary>
         /// dump album list
         /// </summary>
+        /// <param name="albumList">album list XML</param>
         public void ListAlbum(List<GracenoteXml.Model.AlbumModel> albumList)
         {
            // Album
@@ -604,8 +649,9 @@ namespace Gracenote
 
 
         /// <summary>
-        /// dump album list
+        /// show as csv format
         /// </summary>
+        /// <param name="albumList">alubum list XML</param>
         public void CsvAlbum(List<GracenoteXml.Model.AlbumModel> albumList)
         {
             string aNum, aTitle, aArtist, aGnId;
@@ -613,26 +659,21 @@ namespace Gracenote
 
            // Album
             foreach (GracenoteXml.Model.AlbumModel album in albumList) {
-                aNum = album.Ord;
+                aNum = (album.Ord == null || album.Ord == "") ? "1" : album.Ord;
                 aArtist = album.Artist;
                 aTitle = album.Title;
                 aGnId = album.Gn_id;
 
                 foreach (GracenoteXml.Model.TrackModel track in album.Track) {
-                    tNum = track.Track_num;
+                    tNum = (track.Track_num == null || track.Track_num == "") ? "1" : track.Track_num;
                     tArtist = track.Artist;
                     tTitle = track.Title;
-
                     Console.WriteLine("{0}, \"{1}\", \"{2}\", \"{3}\", {4}, \"{5}\", \"{6}\"", aNum, aArtist, aTitle, aGnId, tNum, tArtist, tTitle);
                 }
                 Console.WriteLine();
             }
         }
-
-
     }
-
-
 }
 
 
@@ -684,7 +725,26 @@ namespace ConsoleApplication
             } while (artistName == "" && albumTitle == "" && trackTitle == "");
 
             GracenoteXml.Model.ResponsesModel res = gn.trackSearch(artistName, albumTitle, trackTitle, optRange);
+            dumpResponses(res);
+        }
 
+
+        /// <summary>ALBUM_FETCH test</summary>
+        public static void fetchTest()
+        {
+            string gnid = "";
+            do {
+                Console.Write("GN_ID: ");
+                gnid = Console.ReadLine();
+            } while (gnid == "");
+            GracenoteXml.Model.ResponsesModel res = gn.albumFetch(gnid);
+            dumpResponses(res);
+        }
+
+
+        /// <summary>dump responses</summary>
+        public static void dumpResponses(GracenoteXml.Model.ResponsesModel res)
+        {
             switch (gn.getStatus(res)) {
                 case "OK":
                     Console.WriteLine("Status: OK");
@@ -706,18 +766,6 @@ namespace ConsoleApplication
             }
         }
 
-
-        public static void fetchTest()
-        {
-            string gnid = "";
-            do {
-                Console.Write("GN_ID: ");
-                gnid = Console.ReadLine();
-
-
-            } while (gnid == "");
-
-        }
 
         /// <summary>Main entry</summary>
         public static void Main(string[] args)

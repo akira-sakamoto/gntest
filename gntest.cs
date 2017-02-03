@@ -19,6 +19,16 @@ using System.Runtime.CompilerServices;
 namespace GracenoteXml.Model
 {
     /// <summary>XML definition for Web API responses</summary>
+    /// <remarks>all Gracenote responses are contained in a root RESPONSES element</remarks>
+    /// <example>
+    /// <code>
+    ///   ＜RESPONSES＞
+    ///     ＜RESPONSE＞
+    ///          :
+    ///     ＜/＜RESPONSE＞
+    ///   ＜/RESPONSES＞
+    /// </code>
+    /// </example>
     [System.Xml.Serialization.XmlRoot("RESPONSES")]
     public class ResponsesModel
     {
@@ -27,6 +37,7 @@ namespace GracenoteXml.Model
         public ResponseModel Response { get; set; }
 
         /// <summary>Error Message</summary>
+        /// <remarks>this element shows error message when STATUS attribute is ERROR</remarks>
         [System.Xml.Serialization.XmlElement("MESSAGE")]
         public string Message { get; set; }
     }
@@ -35,6 +46,11 @@ namespace GracenoteXml.Model
     public class ResponseModel
     {
         /// <summary>Status Reporting attribute: OK / MO_MATCH / ERROR</summary>
+        /// <example>
+        /// <code>
+        ///   ＜RESPONSE STATUS="OK"＞
+        /// </code>
+        /// </example>
         [System.Xml.Serialization.XmlAttribute("STATUS")]
         public string Status { get; set; }
 
@@ -205,8 +221,6 @@ namespace Gracenote
     public class WebApi
     {
         private static string _gnWebApi = "https://c{0}.web.cddbp.net/webapi/xml/1.0/";
-        //private static string _gnWebApi = "https://localhost/~asakamoto/posttest/receive.php";
-        //private static string _gnWebApi = "http://localhost/~azira/posttest/receive.php";
         private Settings appSettings;
         private string _userId;
         private string _lang;
@@ -263,7 +277,6 @@ namespace Gracenote
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors)
         {
-            debugLog("OnRemoteCoertificateValidationCallback called");
             return true;  // 「SSL証明書の使用は問題なし」と示す
         }
 
@@ -275,15 +288,17 @@ namespace Gracenote
         /// <returns>Response XML data</returns>
         public GracenoteXml.Model.ResponsesModel Post(string postData)
         {
-            // https 対策
+#if (DEBUG)
+            //this code is required when using untrusted SSL certification
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(OnRemoteCertificateValidationCallback);
+#endif
 
             debugLog("postData: " + postData);
 
             WebRequest request = WebRequest.Create(_gnWebApi);
                 byte[] byteArray = Encoding.UTF8.GetBytes(postData);
                 request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentType = "application/xml";    //  "application/x-www-form-urlencoded"
                 request.ContentLength = byteArray.Length;
 
             // send request
@@ -313,7 +328,6 @@ namespace Gracenote
                 dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                         string responseFromServer = reader.ReadToEnd();
-//debugLog("Post #3 " + responseFromServer);
                     reader.Close();
                 dataStream.Close();
             response.Close();
